@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechPulse - AI/科技/程序员资讯聚合</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* ===== CSS Variables & Reset ===== */
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: #1c2128;
+  --bg-card-hover: #22272e;
+  --bg-input: #0d1117;
+  --border: #30363d;
+  --border-light: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  --accent-blue: #58a6ff;
+  --accent-blue-dim: #1f6feb33;
+  --accent-orange: #f0883e;
+  --accent-purple: #a371f7;
+  --accent-green: #3fb950;
+  --accent-red: #f85149;
+  --accent-yellow: #d29922;
+  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.3);
+  --transition: 0.15s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* ===== Layout ===== */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 960px;
+}
+
+/* ===== Header ===== */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--accent-blue);
+  white-space: nowrap;
+}
+
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.header-meta .label { color: var(--text-muted); }
+.header-meta .value { color: var(--text-primary); }
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--accent-blue-dim);
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  color: var(--accent-blue);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.refresh-btn:hover { background: var(--accent-blue); color: var(--bg-primary); }
+.refresh-btn.loading { pointer-events: none; opacity: 0.7; }
+.refresh-btn.loading svg { animation: spin 1s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auto-refresh {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.auto-refresh input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+}
+
+.search-box {
+  flex: 1;
+  max-width: 400px;
+  margin-left: auto;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 7px 12px 7px 34px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-box input:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-dim); }
+.search-box input::placeholder { color: var(--text-muted); }
+
+.search-box svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+/* ===== Main Layout ===== */
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 240px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-section {
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sidebar-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-blue-dim); color: var(--accent-blue); font-weight: 500; }
+
+.nav-item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.nav-item.active .count { background: var(--accent-blue); color: var(--bg-primary); }
+
+.nav-item svg { flex-shrink: 0; }
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.filter-item:hover { background: var(--bg-card); color: var(--text-primary); }
+.filter-item.active { color: var(--accent-orange); font-weight: 500; }
+.filter-item .count { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+.keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.keyword-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--accent-purple);
+  color: var(--bg-primary);
+  border-radius: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.keyword-tag .remove {
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 13px;
+  line-height: 1;
+}
+.keyword-tag .remove:hover { opacity: 1; }
+
+.add-keyword {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.add-keyword input {
+  flex: 1;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+}
+.add-keyword input:focus { border-color: var(--accent-purple); }
+
+.add-keyword button {
+  padding: 5px 10px;
+  background: var(--accent-purple);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--bg-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border-light);
+}
+
+.export-btn {
+  width: 100%;
+  padding: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 6px;
+}
+.export-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
+
+.mark-all-btn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.mark-all-btn:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+
+/* ===== Content Area ===== */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== Toolbar ===== */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.toolbar-info {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.toolbar-info strong { color: var(--accent-blue); font-weight: 600; }
+
+.sort-group {
+  display: flex;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.sort-btn {
+  padding: 5px 12px;
+  background: var(--bg-card);
+  border: none;
+  border-right: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.sort-btn:last-child { border-right: none; }
+.sort-btn:hover { color: var(--text-primary); }
+.sort-btn.active { background: var(--accent-blue-dim); color: var(--accent-blue); font-weight: 600; }
+
+.filtered-notice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--accent-red);
+  color: var(--bg-primary);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* ===== News List ===== */
+.news-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+.news-list::-webkit-scrollbar { width: 8px; }
+.news-list::-webkit-scrollbar-track { background: transparent; }
+.news-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.news-list::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ===== News Card ===== */
+.news-card {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  padding: 14px 16px 12px 18px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-card);
+}
+
+.news-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  background: var(--credibility-color, var(--border));
+}
+
+.news-card:hover { background: var(--bg-card-hover); border-color: var(--text-muted); }
+.news-card.read { opacity: 0.65; }
+.news-card.read .news-title { color: var(--text-secondary); }
+
+.news-card.starred { border-color: var(--accent-orange); }
+.news-card.starred::before { background: var(--accent-orange); }
+
+.news-card.keyword-hit { border-color: var(--accent-purple); }
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.news-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+  cursor: pointer;
+}
+.news-title:hover { color: var(--accent-blue); }
+
+.news-title mark {
+  background: var(--accent-purple);
+  color: var(--bg-primary);
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.action-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+.action-btn.active-read { color: var(--accent-green); }
+.action-btn.active-star { color: var(--accent-orange); }
+.action-btn.active-fav { color: var(--accent-purple); }
+
+.news-summary {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.news-points {
+  list-style: none;
+  margin-bottom: 10px;
+}
+
+.news-points li {
+  position: relative;
+  padding-left: 16px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2px;
+}
+
+.news-points li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-blue);
+  font-size: 11px;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+}
+
+.meta-source {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+
+.meta-source .extra-sources {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.meta-time { color: var(--text-muted); }
+
+.credibility {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.credibility .star {
+  font-size: 12px;
+  color: var(--border);
+}
+.credibility .star.filled { color: var(--accent-yellow); }
+
+.info-density {
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  font-size: 10px;
+}
+.info-density.high { background: var(--accent-green); color: var(--bg-primary); }
+.info-density.medium { background: var(--accent-yellow); color: var(--bg-primary); }
+.info-density.low { background: var(--text-muted); color: var(--bg-primary); }
+
+.tag-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 1px 7px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.category-badge {
+  padding: 1px 7px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.category-badge.ai { background: var(--accent-blue-dim); color: var(--accent-blue); }
+.category-badge.tech { background: rgba(63,185,80,0.15); color: var(--accent-green); }
+.category-badge.dev { background: rgba(163,113,247,0.15); color: var(--accent-purple); }
+
+.merged-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  background: rgba(88,166,255,0.1);
+  border: 1px solid var(--accent-blue);
+  border-radius: 3px;
+  color: var(--accent-blue);
+  font-size: 10px;
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.empty-state svg { margin-bottom: 16px; opacity: 0.5; }
+.empty-state h3 { font-size: 16px; color: var(--text-secondary); margin-bottom: 6px; }
+.empty-state p { font-size: 13px; font-family: var(--font-mono); }
+
+/* ===== Toast ===== */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-blue);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  animation: slideIn 0.2s ease;
+  max-width: 320px;
+}
+
+.toast.success { border-left-color: var(--accent-green); }
+.toast.warning { border-left-color: var(--accent-orange); }
+.toast.error { border-left-color: var(--accent-red); }
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 420px;
+  max-width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.modal h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.modal-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.modal-option:hover { border-color: var(--accent-blue); background: var(--bg-card); }
+.modal-option input { accent-color: var(--accent-blue); }
+.modal-option label { flex: 1; font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  border: 1px solid var(--accent-blue);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn-secondary:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+.deploy-info {
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+.deploy-info code {
+  background: var(--bg-input);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--accent-green);
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      TechPulse
+    </div>
+    <div class="header-meta">
+      <span class="label">更新:</span>
+      <span class="value" id="lastUpdate">--:--:--</span>
+    </div>
+    <div class="header-meta">
+      <span class="label">下次刷新:</span>
+      <span class="value" id="nextRefresh">--</span>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshNews()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      刷新
+    </button>
+    <label class="auto-refresh">
+      <input type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()">
+      自动刷新(30min)
+    </label>
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="搜索标题 / 摘要 / 标签..." oninput="renderNews()">
+    </div>
+  </header>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">分类</div>
+        <div class="nav-item active" data-category="all" onclick="setCategory('all')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          全部
+          <span class="count" id="count-all">0</span>
+        </div>
+        <div class="nav-item" data-category="ai" onclick="setCategory('ai')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M12 11v4M8 21h8M12 17v4"/></svg>
+          AI 行业
+          <span class="count" id="count-ai">0</span>
+        </div>
+        <div class="nav-item" data-category="tech" onclick="setCategory('tech')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          科技
+          <span class="count" id="count-tech">0</span>
+        </div>
+        <div class="nav-item" data-category="dev" onclick="setCategory('dev')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          程序员
+          <span class="count" id="count-dev">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">过滤器</div>
+        <div class="filter-item active" data-filter="all" onclick="setFilter('all')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          全部资讯
+          <span class="count" id="fcount-all">0</span>
+        </div>
+        <div class="filter-item" data-filter="unread" onclick="setFilter('unread')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>
+          未读
+          <span class="count" id="fcount-unread">0</span>
+        </div>
+        <div class="filter-item" data-filter="read" onclick="setFilter('read')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          已读
+          <span class="count" id="fcount-read">0</span>
+        </div>
+        <div class="filter-item" data-filter="starred" onclick="setFilter('starred')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          星标
+          <span class="count" id="fcount-starred">0</span>
+        </div>
+        <div class="filter-item" data-filter="favorites" onclick="setFilter('favorites')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          关键词收藏
+          <span class="count" id="fcount-favorites">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-title">关键词监控</div>
+        <div class="keyword-list" id="keywordList"></div>
+        <div class="add-keyword">
+          <input type="text" id="keywordInput" placeholder="添加关键词..." onkeydown="if(event.key==='Enter')addKeyword()">
+          <button onclick="addKeyword()">+</button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="export-btn" onclick="openExportModal()">
+          导出星标 / 收藏
+        </button>
+        <button class="mark-all-btn" onclick="markAllRead()">
+          全部标记为已读
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===== Content ===== -->
+    <div class="content">
+      <div class="toolbar">
+        <div class="toolbar-info">
+          共 <strong id="totalCount">0</strong> 条资讯
+          <span id="filteredInfo"></span>
+        </div>
+        <div class="filtered-notice" id="filteredNotice" style="display:none;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          已过滤 <span id="filteredCount">0</span> 条营销水文
+        </div>
+        <div class="sort-group">
+          <button class="sort-btn active" data-sort="composite" onclick="setSort('composite')">综合</button>
+          <button class="sort-btn" data-sort="latest" onclick="setSort('latest')">最新</button>
+          <button class="sort-btn" data-sort="hot" onclick="setSort('hot')">最热</button>
+          <button class="sort-btn" data-sort="credibility" onclick="setSort('credibility')">可信度</button>
+        </div>
+      </div>
+      <div class="news-list" id="newsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Export Modal ===== -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h3>导出资讯</h3>
+    <div class="modal-option">
+      <input type="radio" name="exportScope" id="scopeStarred" value="starred" checked>
+      <label for="scopeStarred">今日星标资讯</label>
+    </div>
+    <div class="modal-option">
+      <input type="radio" name="exportScope" id="scopeFavorites" value="favorites">
+      <label for="scopeFavorites">关键词收藏命中</label>
+    </div>
+    <div class="modal-option">
+      <input type="radio" name="exportScope" id="scopeBoth" value="both">
+      <label for="scopeBoth">星标 + 收藏（合并）</label>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="sidebar-title" style="margin-bottom:6px;">导出格式</div>
+      <div class="modal-option">
+        <input type="radio" name="exportFormat" id="fmtMarkdown" value="markdown" checked>
+        <label for="fmtMarkdown">Markdown (.md) - 适合笔记 / 飞书文档</label>
+      </div>
+      <div class="modal-option">
+        <input type="radio" name="exportFormat" id="fmtCsv" value="csv">
+        <label for="fmtCsv">CSV (.csv) - Excel 可直接打开</label>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeExportModal()">取消</button>
+      <button class="btn-primary" onclick="doExport()">确认导出</button>
+    </div>
+    <div class="deploy-info">
+      <strong style="color:var(--text-secondary);">飞书云盘同步规范（预留）</strong><br>
+      目录: <code>TechPulse/导出/YYYY-MM/</code><br>
+      命名: <code>techpulse_YYYYMMDD_HHmm_{scope}.{ext}</code><br>
+      示例: <code>techpulse_20260902_1830_starred.md</code>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Toast Container ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ============================================================
+   TechPulse - 资讯聚合工具
+   数据层 / 状态管理 / 渲染引擎 / 交互逻辑
+   ============================================================ */
+
+// ===== 时间基准 =====
+const NOW = Date.now();
+const HOUR = 3600000;
+const MIN = 60000;
+
+// ===== 模拟资讯数据池 =====
+// 说明：纯前端应用无法直接跨域抓取实时新闻（CORS限制）。
+// 内置高质量模拟数据演示全部功能；真实部署时可接入 RSS 代理 / 自建 API。
+// 数据结构：{ id, title, summary, points[], category, source, extraSources[],
+//             publishedAt, credibility, infoDensity, importance, hotness, tags[],
+//             isMarketing, mergedEventId }
+
+const NEWS_POOL = [
+  // ===== AI 行业 =====
+  {
+    id: 'ai_001',
+    title: 'OpenAI 发布 GPT-5 系列模型，上下文窗口扩展至 100 万 token',
+    summary: '新一代模型在代码生成、长文档理解和多模态推理上均有显著提升，API 价格较上一代下降 30%。',
+    points: [
+      '100 万 token 上下文可一次性处理约 75 万字，相当于一部长篇小说',
+      'HumanEval 代码基准得分 94.2%，较 GPT-4o 提升 8.7 个百分点',
+      'API 输入价格 $0.0075/1K tokens，输出 $0.03/1K tokens，降幅约 30%',
+      '同步发布微调 API 和函数调用 v3 版本，支持并行工具调用'
+    ],
+    category: 'ai',
+    source: 'OpenAI 官方博客',
+    extraSources: ['TechCrunch', 'The Verge', '机器之心'],
+    publishedAt: NOW - 2 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 10,
+    hotness: 10,
+    tags: ['大模型', 'OpenAI', 'API', '上下文窗口'],
+    isMarketing: false
+  },
+  {
+    id: 'ai_002',
+    title: '某创业公司用 Claude 3.5 Sonnet 实现代码库自动迁移，3 天完成 12 万行 Python 2 到 3 升级',
+    summary: '真实工程案例：通过结构化 prompt + 分模块验证 + CI 门禁，将遗留系统迁移成本降低 80%。',
+    points: [
+      '迁移策略：按模块拆分，每个模块生成迁移计划 → 执行 → 单元测试验证三段式',
+      '12 万行代码中 92% 由 AI 自动修改，剩余 8% 为 C 扩展和元编程需人工处理',
+      '迁移后全部 1,847 个单元测试通过，性能基准测试无回归',
+      '团队开源了迁移 prompt 模板和验证脚本，GitHub 已获 2.3k stars'
+    ],
+    category: 'ai',
+    source: '公司工程博客',
+    extraSources: ['Hacker News', 'GitHub Trending'],
+    publishedAt: NOW - 4 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 9,
+    hotness: 8,
+    tags: ['AI应用落地', '代码迁移', '工程实践', 'Claude', '开源'],
+    isMarketing: false
+  },
+  {
+    id: 'ai_003',
+    title: 'Meta 开源 Llama 3.2 多模态模型，支持 128K 上下文且可商用',
+    summary: '11B 和 90B 两个版本同步开源，视觉理解能力对标 GPT-4V，社区已推出量化版和 LoRA 微调方案。',
+    points: [
+      '11B 版本 4-bit 量化后可在 16GB 显存显卡上运行',
+      '支持图像 + 文本混合输入，可解析图表、UI 截图、手写文档',
+      '采用宽松的商业许可，年营收低于 7 亿美元的公司可免费商用',
+      'HuggingFace 上线 24 小时内下载量突破 50 万次'
+    ],
+    category: 'ai',
+    source: 'Meta AI 官方',
+    extraSources: ['HuggingFace', '机器之心', '量子位'],
+    publishedAt: NOW - 6 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 9,
+    hotness: 9,
+    tags: ['开源', '大模型', '多模态', 'Meta', 'Llama'],
+    isMarketing: false
+  },
+  {
+    id: 'ai_004',
+    title: 'AI Agent 框架 LangGraph 发布 1.0 版本，引入持久化状态和人类介入节点',
+    summary: '生产级 Agent 编排框架正式稳定，支持状态检查点、断点续跑、人工审核节点，已被多家金融机构采用。',
+    points: [
+      'StateGraph 支持将 Agent 执行状态持久化到 Redis/PostgreSQL，支持崩溃恢复',
+      'interrupt() API 可在任意节点暂停执行，等待人类输入后继续',
+      '内置时间旅行调试器，可回溯 Agent 决策路径并重新执行',
+      '官方基准测试显示复杂多步任务成功率较 0.x 版本提升 35%'
+    ],
+    category: 'ai',
+    source: 'LangChain 官方博客',
+    extraSources: ['GitHub', 'Hacker News'],
+    publishedAt: NOW - 8 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 7,
+    tags: ['AI Agent', '开源框架', 'LangGraph', '工程实践'],
+    isMarketing: false
+  },
+  {
+    id: 'ai_005',
+    title: 'RAG 系统性能优化实战：向量检索召回率从 62% 提升到 91% 的五个关键改动',
+    summary: '基于 50 万文档规模的真实业务复盘，详细记录分块策略、重排序、查询改写等优化的量化效果。',
+    points: [
+      '分块策略从固定 512 token 改为语义分块 + 父子文档结构，召回率 +14%',
+      '引入 Cohere Rerank v3 重排序，Top-5 精度从 71% 提升到 88%',
+      '查询改写模块：用 LLM 将用户问题扩展为 3 个变体查询，多路召回合并',
+      '混合检索（BM25 + 向量）权重调优，稀有术语匹配率显著改善',
+      '完整优化后系统 P95 延迟 320ms，成本增加约 15%'
+    ],
+    category: 'ai',
+    source: '技术团队复盘博客',
+    extraSources: [],
+    publishedAt: NOW - 10 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 6,
+    tags: ['RAG', '向量检索', '工程实践', '性能优化', '案例复盘'],
+    isMarketing: false
+  },
+  {
+    id: 'ai_006',
+    title: '【营销水文】2026 年最值得加入的 AI 训练营，零基础三个月变身算法工程师！',
+    summary: '限时优惠，前 100 名报名立减 5000 元，加群领取独家资料包，私信咨询课程详情。',
+    points: ['加微信领取 200G 资料包', '名师一对一辅导，就业率 99%', '限时特惠，仅剩 20 个名额'],
+    category: 'ai',
+    source: '未知来源',
+    extraSources: [],
+    publishedAt: NOW - 1 * HOUR,
+    credibility: 1,
+    infoDensity: 'low',
+    importance: 1,
+    hotness: 2,
+    tags: ['营销', '课程', '训练营'],
+    isMarketing: true
+  },
+  {
+    id: 'ai_007',
+    title: 'Stable Diffusion 3.5 开源版发布，图像生成质量追平 MidJourney v6',
+    summary: '非商业用途完全免费，社区已推出 ControlNet 适配和 LoRA 训练脚本，本地部署门槛进一步降低。',
+    points: [
+      '2B 参数版本可在 8GB 显存上运行，生成 1024x1024 图像约 4 秒',
+      '文本渲染能力大幅提升，可准确生成中英文文字',
+      '官方提供 ComfyUI 工作流模板和 API 服务端实现',
+      '模型权重采用 OpenRAIL-M 许可，允许商业使用'
+    ],
+    category: 'ai',
+    source: 'Stability AI 官方',
+    extraSources: ['HuggingFace', 'Civitai'],
+    publishedAt: NOW - 12 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 7,
+    hotness: 8,
+    tags: ['AIGC', '图像生成', '开源', 'Stable Diffusion'],
+    isMarketing: false
+  },
+  {
+    id: 'ai_008',
+    title: '大模型推理成本下降 90% 背后：vLLM、TensorRT-LLM 与 speculative decoding 的工程取舍',
+    summary: '系统梳理 2026 年主流推理加速技术的原理、适用场景和实测性能数据，帮助团队选型。',
+    points: [
+      'vLLM PagedAttention 显存利用率提升 3-4 倍，适合高并发在线服务',
+      'TensorRT-LLM 编译优化延迟最低，但模型适配成本较高',
+      'Speculative decoding 用小模型草稿 + 大模型验证，吞吐量提升 2-3 倍',
+      '70B 模型推理成本已从 $2/1K tokens 降至 $0.02/1K tokens，两年降 100 倍'
+    ],
+    category: 'ai',
+    source: '系统架构技术博客',
+    extraSources: [],
+    publishedAt: NOW - 14 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 7,
+    hotness: 5,
+    tags: ['推理优化', 'vLLM', 'TensorRT', '工程实践', '性能'],
+    isMarketing: false
+  },
+
+  // ===== 科技行业 =====
+  {
+    id: 'tech_001',
+    title: 'AWS 推出 Graviton5 处理器，性能较上代提升 40%，性价比优势扩大',
+    summary: '第五代自研 ARM 服务器芯片采用 3nm 工艺，128 核设计，EC2 实例价格较 x86 低 20%。',
+    points: [
+      '3nm 工艺，128 核 256 线程，主频 3.5GHz，支持 DDR5-6400',
+      'SPECint 基准性能较 Graviton4 提升 40%，每瓦性能提升 55%',
+      '配套 EC2 R8g 实例内存带宽提升 80%，适合内存密集型工作负载',
+      '已有 Datadog、Snowflake、Netflix 等客户宣布迁移计划'
+    ],
+    category: 'tech',
+    source: 'AWS 官方公告',
+    extraSources: ['AnandTech', 'The Next Platform'],
+    publishedAt: NOW - 3 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 9,
+    hotness: 8,
+    tags: ['AWS', 'ARM', '服务器芯片', '云计算', 'Graviton'],
+    isMarketing: false
+  },
+  {
+    id: 'tech_002',
+    title: 'Cloudflare 推出 Workers AI 推理平台，按毫秒计费，冷启动低于 50ms',
+    summary: '全球 300+ 节点分布式推理，支持 Llama、Mistral、Whisper 等开源模型，开发者可免费试用。',
+    points: [
+      '按实际推理毫秒数计费，无最低消费，免费额度每天 10,000 神经元',
+      '冷启动时间中位数 38ms，全球任意节点就近执行',
+      '支持流式输出、函数调用、批量推理，API 兼容 OpenAI 格式',
+      '与 Workers、KV、D1 数据库无缝集成，可构建全栈 AI 应用'
+    ],
+    category: 'tech',
+    source: 'Cloudflare 官方博客',
+    extraSources: ['Hacker News', 'InfoQ'],
+    publishedAt: NOW - 5 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 7,
+    tags: ['Cloudflare', '边缘计算', 'AI推理', 'Serverless', '开发者工具'],
+    isMarketing: false
+  },
+  {
+    id: 'tech_003',
+    title: 'NVIDIA 发布 Blackwell Ultra 架构 GPU，HBM4 显存带宽突破 8TB/s',
+    summary: 'B300 双芯片设计，FP4 算力 10 PFLOPS，专为大规模 AI 训练优化，预计 Q4 量产。',
+    points: [
+      '双 die 设计，共 2880 亿晶体管，FP4 精度算力 10 PFLOPS',
+      'HBM4 显存 288GB，带宽 8.4 TB/s，较 HBM3e 提升 2 倍',
+      'NVLink 6.0 互联带宽 1.8 TB/s，支持 8 卡全互联拓扑',
+      '训练 GPT-4 级别模型时间从 90 天缩短至 25 天'
+    ],
+    category: 'tech',
+    source: 'NVIDIA 官方发布会',
+    extraSources: ['Tom\'s Hardware', 'AnandTech'],
+    publishedAt: NOW - 7 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 9,
+    hotness: 9,
+    tags: ['NVIDIA', 'GPU', 'AI芯片', 'Blackwell', '硬件'],
+    isMarketing: false
+  },
+  {
+    id: 'tech_004',
+    title: 'PostgreSQL 17 正式发布：异步 I/O、增量备份、JSON 性能全面提升',
+    summary: '全球最流行开源数据库的大版本更新，重点优化高并发 I/O 和大数据量场景，升级无需转储。',
+    points: [
+      '异步 I/O 支持，高并发读写场景吞吐量提升 2-4 倍',
+      '增量备份功能，仅备份变化的数据块，备份时间减少 80%',
+      'JSONB 操作性能提升 30-50%，新增更多 JSON 函数',
+      '逻辑复制支持表结构变更同步，大版本升级可在线完成'
+    ],
+    category: 'tech',
+    source: 'PostgreSQL 全球开发组',
+    extraSources: ['InfoQ', 'Hacker News'],
+    publishedAt: NOW - 9 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 7,
+    tags: ['PostgreSQL', '数据库', '开源', '版本更新'],
+    isMarketing: false
+  },
+  {
+    id: 'tech_005',
+    title: '【营销水文】震惊！这个云服务器只要 9 元一年，赶紧加群领取优惠码！',
+    summary: '限时秒杀，9 元抢 4核8G 云服务器，私信我发链接，数量有限先到先得。',
+    points: ['加群领专属优惠码', '私信发购买链接', '限时秒杀手慢无'],
+    category: 'tech',
+    source: '未知来源',
+    extraSources: [],
+    publishedAt: NOW - 30 * MIN,
+    credibility: 1,
+    infoDensity: 'low',
+    importance: 1,
+    hotness: 1,
+    tags: ['营销', '推广', '引流'],
+    isMarketing: true
+  },
+  {
+    id: 'tech_006',
+    title: 'GitHub Copilot 推出 Agent 模式：可自主完成 Issue、提交 PR、运行 CI',
+    summary: '从代码补全升级为自主开发代理，可理解 Issue 描述、修改代码、运行测试并提交 Pull Request。',
+    points: [
+      'Agent 模式可读取整个代码库上下文，理解项目结构和约定',
+      '支持自主运行测试、修复 lint 错误、根据 CI 反馈迭代修改',
+      '生成的 PR 包含详细的变更说明和测试结果，供人工审核',
+      '企业版客户可配置 Agent 权限范围，限制可访问的仓库和分支'
+    ],
+    category: 'tech',
+    source: 'GitHub 官方博客',
+    extraSources: ['The Verge', 'TechCrunch'],
+    publishedAt: NOW - 11 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 8,
+    tags: ['GitHub', 'Copilot', 'AI Agent', '开发者工具', '代码补全'],
+    isMarketing: false
+  },
+  {
+    id: 'tech_007',
+    title: '苹果宣布 M5 芯片采用 2nm 工艺，MacBook Pro 续航突破 30 小时',
+    summary: 'M5 Pro 和 M5 Max 同步发布，CPU 性能提升 30%，GPU 光线追踪性能翻倍。',
+    points: [
+      '2nm 工艺，M5 Max 最高 16 核 CPU + 80 核 GPU + 192GB 统一内存',
+      '视频播放续航 32 小时，实际办公使用约 22 小时',
+      '支持 AV1 硬件编解码，ProRes 视频处理速度提升 2 倍',
+      '新款 MacBook Pro 起售价 1999 美元，本月下旬开售'
+    ],
+    category: 'tech',
+    source: 'Apple 发布会',
+    extraSources: ['The Verge', 'Ars Technica'],
+    publishedAt: NOW - 13 * HOUR,
+    credibility: 5,
+    infoDensity: 'medium',
+    importance: 7,
+    hotness: 8,
+    tags: ['Apple', 'M5', '芯片', 'MacBook', '硬件'],
+    isMarketing: false
+  },
+
+  // ===== 程序员 =====
+  {
+    id: 'dev_001',
+    title: 'Rust 1.85 稳定版发布：async trait 正式稳定，异步生态迎来里程碑',
+    summary: '经过 5 年开发，async fn in trait 终于稳定，同时引入 impl Trait in type aliases 和新的 lint 规则。',
+    points: [
+      'async fn in trait 稳定，无需 async-trait  crate 即可在 trait 中定义异步方法',
+      '性能较 async-trait 宏方案提升约 15%，减少堆分配',
+      'impl Trait in type aliases (RPITIT) 稳定，可在类型别名中使用 impl Trait',
+      '新增 12 个 clippy lint，包括潜在的锁竞争和未处理的 Result 检测'
+    ],
+    category: 'dev',
+    source: 'Rust 官方博客',
+    extraSources: ['Hacker News', 'Reddit/r/rust'],
+    publishedAt: NOW - 1 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 9,
+    hotness: 9,
+    tags: ['Rust', '异步编程', '版本更新', '编程语言', '开源'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_002',
+    title: 'TypeScript 5.8 引入原生类型擦除提案支持，编译速度提升 20%',
+    summary: '支持 ECMAScript Stage 3 的类型擦除提案，类型注解可直接被运行时忽略，不再需要完整编译。',
+    points: [
+      '支持 --erase-types 标志，直接输出带类型注解的 JS，运行时自动忽略',
+      '与 Vite、esbuild 等工具链配合，开发服务器冷启动速度提升 40%',
+      '新增 satisfies 操作符的类型推断改进，减少不必要的类型断言',
+      '严格模式新增 no-unsafe-destructuring 检查'
+    ],
+    category: 'dev',
+    source: 'TypeScript 官方博客',
+    extraSources: ['Dev.to', 'Hacker News'],
+    publishedAt: NOW - 3 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 7,
+    tags: ['TypeScript', '前端', '版本更新', 'JavaScript', '类型系统'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_003',
+    title: 'Go 1.24 发布：内置 iter 包、范围函数、结构化日志正式稳定',
+    summary: 'Go 语言近年来最大的标准库扩展，iter 包为函数式编程提供基础，slices 和 maps 包新增大量工具函数。',
+    points: [
+      'iter 包稳定，支持 range-over-func，可自定义迭代器',
+      'slices 包新增 Sort、Min、Max、ContainsFunc 等 15 个函数',
+      'log/slog 结构化日志正式稳定，支持 JSON 和文本格式',
+      '垃圾回收器优化，大堆内存场景暂停时间降低 50%'
+    ],
+    category: 'dev',
+    source: 'Go 官方博客',
+    extraSources: ['Hacker News', 'Go 官方文档'],
+    publishedAt: NOW - 5 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 7,
+    tags: ['Go', '编程语言', '版本更新', '标准库', '开源'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_004',
+    title: '从单体到微服务的失败与回归：一个 15 人团队的架构复盘',
+    summary: '盲目拆分微服务导致开发效率下降 40%，最终回归模块化单体，详细记录决策过程和量化数据。',
+    points: [
+      '拆分 12 个微服务后，跨服务联调时间从平均 2 小时增加到 1.5 天',
+      '分布式事务问题频发，数据一致性 Bug 占总 Bug 数的 35%',
+      '回归模块化单体后，部署频率从每周 2 次提升到每天 5 次',
+      '核心教训：团队规模 < 20 人时，模块化单体优于微服务；先有边界再拆服务'
+    ],
+    category: 'dev',
+    source: '团队架构复盘博客',
+    extraSources: ['Hacker News'],
+    publishedAt: NOW - 7 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 8,
+    hotness: 8,
+    tags: ['架构', '微服务', '模块化单体', '案例复盘', '工程实践'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_005',
+    title: 'Bun 1.3 发布：Node.js 兼容性达 98%，npm install 速度快 5 倍',
+    summary: 'JavaScript 运行时 Bun 持续迭代，内置包管理器、测试运行器、打包器，全链路性能领先。',
+    points: [
+      'Node.js 内置模块兼容性 98%，主流框架（Next.js、Express、NestJS）均可直接运行',
+      'bun install 较 npm install 快 5-10 倍，较 pnpm 快 2-3 倍',
+      '内置测试运行器支持 watch 模式和覆盖率报告，兼容 Jest API',
+      'HTTP 服务器吞吐量较 Node.js 高 2.5 倍，WebSocket 连接数提升 3 倍'
+    ],
+    category: 'dev',
+    source: 'Bun 官方博客',
+    extraSources: ['GitHub', 'Hacker News'],
+    publishedAt: NOW - 9 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 7,
+    hotness: 7,
+    tags: ['Bun', 'JavaScript', '运行时', 'Node.js', '性能'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_006',
+    title: '【营销水文】程序员副业月入 5 万的秘密，加我微信领取独家项目源码！',
+    summary: '零基础也能做的副业项目，每天 1 小时月入过万，私信领取 100 个可直接运营的项目。',
+    points: ['加微信领项目源码', '一对一指导包教包会', '限时免费前 50 名'],
+    category: 'dev',
+    source: '未知来源',
+    extraSources: [],
+    publishedAt: NOW - 20 * MIN,
+    credibility: 1,
+    infoDensity: 'low',
+    importance: 1,
+    hotness: 1,
+    tags: ['营销', '副业', '引流'],
+    isMarketing: true
+  },
+  {
+    id: 'dev_007',
+    title: 'Kubernetes 1.32 发布：Sidecar 容器正式稳定，资源管理大幅简化',
+    summary: 'Sidecar 容器从 Alpha 升级为 Stable，同时引入 Pod 级资源配额和动态资源分配改进。',
+    points: [
+      'Sidecar 容器稳定，init 容器可长期运行，支持服务网格和日志代理场景',
+      'Pod 级资源配额（PodResources）稳定，可统一管理 Pod 内所有容器的资源上限',
+      '动态资源分配（DRA）进入 Beta，支持 GPU/FPGA 等异构资源的精细调度',
+      'kubectl 新增 --chunk-size 参数，大集群下列表操作内存占用降低 60%'
+    ],
+    category: 'dev',
+    source: 'Kubernetes 官方博客',
+    extraSources: ['CNCF', 'InfoQ'],
+    publishedAt: NOW - 11 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 7,
+    hotness: 6,
+    tags: ['Kubernetes', '容器编排', 'DevOps', '版本更新', '云原生'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_008',
+    title: 'VS Code 1.100 里程碑版本：内置 AI 聊天、多光标重构、性能优化',
+    summary: '第 100 个版本带来多项重磅功能，编辑器启动速度提升 30%，大文件打开不再卡顿。',
+    points: [
+      '内置 AI 聊天面板，支持代码解释、生成测试、重构建议，可对接多个 LLM 提供商',
+      '多光标重构：可同时编辑多个相似代码块，自动同步变量名和结构',
+      '大文件优化：100MB 文件打开时间从 12 秒降至 3 秒，滚动无卡顿',
+      '扩展主机隔离：不稳定扩展不会导致整个编辑器崩溃，自动重启扩展主机'
+    ],
+    category: 'dev',
+    source: 'VS Code 官方博客',
+    extraSources: ['GitHub', 'Hacker News'],
+    publishedAt: NOW - 13 * HOUR,
+    credibility: 5,
+    infoDensity: 'high',
+    importance: 7,
+    hotness: 7,
+    tags: ['VS Code', '编辑器', '开发者工具', 'AI', '版本更新'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_009',
+    title: 'SQL 查询优化实战：从 30 秒到 200ms，一个复杂报表查询的优化全过程',
+    summary: '记录一个涉及 8 张表、百万级数据的报表查询优化全过程，包含执行计划分析和索引调优。',
+    points: [
+      '原始查询 30.2 秒，通过 EXPLAIN ANALYZE 发现全表扫描和嵌套循环',
+      '添加 3 个复合索引后降至 4.5 秒，但仍存在排序溢出',
+      '改写为 CTE + 物化视图，预聚合数据使查询降至 200ms',
+      '引入查询结果缓存（5 分钟 TTL），高峰期平均响应 15ms',
+      '完整优化后数据库 CPU 使用率从 85% 降至 22%'
+    ],
+    category: 'dev',
+    source: 'DBA 技术博客',
+    extraSources: [],
+    publishedAt: NOW - 15 * HOUR,
+    credibility: 4,
+    infoDensity: 'high',
+    importance: 7,
+    hotness: 5,
+    tags: ['SQL', '数据库优化', '性能调优', '案例复盘', '工程实践'],
+    isMarketing: false
+  },
+  {
+    id: 'dev_010',
+    title: '开源项目 weekly：本周最值得关注的 5 个 GitHub 项目',
+    summary: '精选本周 Trending 中高星、高活跃度、有实际价值的开源项目，涵盖工具库、框架和应用。',
+    points: [
+      'picoquery：零依赖 SQL 查询构建器，3KB gzipped，TypeScript 原生支持',
+      'restish：交互式 REST API 客户端，支持自动生成文档和请求历史',
+      'tinyvec：Rust 小型向量库，栈上分配无堆开销，性能较 Vec 快 30%',
+      'lazydocker：终端 Docker 管理工具，TUI 界面，支持容器/镜像/卷/网络管理',
+      'zetch：前端数据获取库，支持自动缓存、重试、乐观更新，体积仅 2KB'
+    ],
+    category: 'dev',
+    source: 'GitHub Trending 精选',
+    extraSources: ['Hacker News'],
+    publishedAt: NOW - 16 * HOUR,
+    credibility: 3,
+    infoDensity: 'medium',
+    importance: 6,
+    hotness: 5,
+    tags: ['开源', 'GitHub', '工具库', '每周精选'],
+    isMarketing: false
+  },
+
+  // ===== 去重示例：同一事件多来源 =====
+  {
+    id: 'ai_009',
+    title: 'GPT-5 正式发布，100 万 token 上下文 + 多模态理解',
+    summary: 'OpenAI 今日发布新一代大模型，在多个基准测试中刷新纪录。',
+    points: ['上下文窗口扩展至 100 万 token', '多模态能力增强', 'API 价格下降'],
+    category: 'ai',
+    source: '科技媒体报道',
+    extraSources: [],
+    publishedAt: NOW - 2.5 * HOUR,
+    credibility: 3,
+    infoDensity: 'medium',
+    importance: 7,
+    hotness: 7,
+    tags: ['大模型', 'OpenAI'],
+    isMarketing: false,
+    mergedEventId: 'event_gpt5'
+  },
+  {
+    id: 'ai_010',
+    title: 'OpenAI GPT-5 深度评测：代码能力提升显著，长文本处理突破',
+    summary: '第三方评测机构对 GPT-5 进行全面测试，HumanEval 得分 94.2%。',
+    points: ['HumanEval 94.2%', '长文档理解能力强', '多模态推理准确'],
+    category: 'ai',
+    source: '第三方评测',
+    extraSources: [],
+    publishedAt: NOW - 1.5 * HOUR,
+    credibility: 4,
+    infoDensity: 'medium',
+    importance: 6,
+    hotness: 6,
+    tags: ['评测', '大模型', 'OpenAI'],
+    isMarketing: false,
+    mergedEventId: 'event_gpt5'
+  }
+];
+
+// ===== 应用状态 =====
+const state = {
+  category: 'all',        // all | ai | tech | dev
+  filter: 'all',          // all | unread | read | starred | favorites
+  sort: 'composite',      // composite | latest | hot | credibility
+  search: '',
+  keywords: JSON.parse(localStorage.getItem('tp_keywords') || '["RAG","开源","工程实践","性能优化"]'),
+  readIds: JSON.parse(localStorage.getItem('tp_read') || '[]'),
+  starredIds: JSON.parse(localStorage.getItem('tp_starred') || '[]'),
+  autoRefresh: true,
+  refreshInterval: 30 * MIN,
+  lastRefresh: NOW,
+  nextRefreshTimer: null,
+  countdownTimer: null
+};
+
+// ===== 工具函数 =====
+function saveState() {
+  localStorage.setItem('tp_keywords', JSON.stringify(state.keywords));
+  localStorage.setItem('tp_read', JSON.stringify(state.readIds));
+  localStorage.setItem('tp_starred', JSON.stringify(state.starredIds));
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  if (diff < MIN) return '刚刚';
+  if (diff < HOUR) return Math.floor(diff / MIN) + ' 分钟前';
+  if (diff < 24 * HOUR) return Math.floor(diff / HOUR) + ' 小时前';
+  return Math.floor(diff / (24 * HOUR)) + ' 天前';
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  return d.toISOString().slice(0, 10);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function highlightKeywords(text) {
+  let result = escapeHtml(text);
+  state.keywords.forEach(kw => {
+    if (!kw.trim()) return;
+    const regex = new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    result = result.replace(regex, '<mark>$1</mark>');
+  });
+  return result;
+}
+
+function isKeywordHit(news) {
+  const text = (news.title + ' ' + news.summary + ' ' + news.tags.join(' ')).toLowerCase();
+  return state.keywords.some(kw => kw.trim() && text.includes(kw.trim().toLowerCase()));
+}
+
+// ===== 营销水文判定 =====
+function isMarketingContent(news) {
+  if (news.isMarketing) return true;
+  const text = (news.title + ' ' + news.summary + ' ' + (news.points || []).join(' ')).toLowerCase();
+  const marketingPatterns = [
+    /加群|加微信|私信|领资料|领取资料|资料包/,
+    /课程|训练营|培训|辅导班/,
+    /咨询|一对一辅导|包教包会/,
+    /限时优惠|限时秒杀|立减|特惠|名额有限|手慢无/,
+    /月入|副业赚钱|零基础.*赚|包就业|就业率.*99/
+  ];
+  return marketingPatterns.some(p => p.test(text));
+}
+
+// ===== 去重：合并同一事件 =====
+function deduplicateNews(newsList) {
+  const eventMap = {};
+  const result = [];
+
+  newsList.forEach(news => {
+    if (news.mergedEventId) {
+      if (!eventMap[news.mergedEventId]) {
+        eventMap[news.mergedEventId] = { ...news, extraSources: [...(news.extraSources || [])], _mergedCount: 1 };
+        result.push(eventMap[news.mergedEventId]);
+      } else {
+        const existing = eventMap[news.mergedEventId];
+        existing._mergedCount++;
+        if (news.source && !existing.extraSources.includes(news.source)) {
+          existing.extraSources.push(news.source);
+        }
+        // 保留信息更丰富的版本的要点
+        if ((news.points || []).length > (existing.points || []).length) {
+          existing.points = news.points;
+          existing.summary = news.summary;
+        }
+        // 取更高的可信度
+        existing.credibility = Math.max(existing.credibility, news.credibility);
+        existing.importance = Math.max(existing.importance, news.importance);
+        existing.hotness = Math.max(existing.hotness, news.hotness);
+      }
+    } else {
+      result.push(news);
+    }
+  });
+
+  return result;
+}
+
+// ===== 综合排序得分 =====
+function compositeScore(news) {
+  // 个性化偏好加权：AI应用落地、工程实践、开源项目、真实案例复盘 优先
+  const prefTags = ['AI应用落地', '工程实践', '开源', '案例复盘', '性能优化', '真实案例'];
+  let prefBoost = 0;
+  (news.tags || []).forEach(tag => {
+    if (prefTags.some(p => tag.includes(p) || p.includes(tag))) prefBoost += 0.5;
+  });
+
+  // 不喜欢的内容降权：纯概念、泛科普
+  const negTags = ['纯概念', '泛科普', '观点输出'];
+  (news.tags || []).forEach(tag => {
+    if (negTags.some(n => tag.includes(n))) prefBoost -= 1;
+  });
+
+  const timeDecay = Math.max(0, 1 - (Date.now() - news.publishedAt) / (24 * HOUR));
+  return (news.importance * 0.4 + news.hotness * 0.3 + timeDecay * 10 * 0.3) + prefBoost;
+}
+
+// ===== 获取过滤后的资讯列表 =====
+function getFilteredNews() {
+  let list = [...NEWS_POOL];
+
+  // 去重
+  list = deduplicateNews(list);
+
+  // 过滤营销水文
+  const beforeFilter = list.length;
+  list = list.filter(n => !isMarketingContent(n));
+  state._filteredCount = beforeFilter - list.length;
+
+  // 分类过滤
+  if (state.category !== 'all') {
+    list = list.filter(n => n.category === state.category);
+  }
+
+  // 状态过滤
+  if (state.filter === 'unread') {
+    list = list.filter(n => !state.readIds.includes(n.id));
+  } else if (state.filter === 'read') {
+    list = list.filter(n => state.readIds.includes(n.id));
+  } else if (state.filter === 'starred') {
+    list = list.filter(n => state.starredIds.includes(n.id));
+  } else if (state.filter === 'favorites') {
+    list = list.filter(n => isKeywordHit(n));
+  }
+
+  // 搜索过滤
+  if (state.search.trim()) {
+    const q = state.search.trim().toLowerCase();
+    list = list.filter(n =>
+      n.title.toLowerCase().includes(q) ||
+      n.summary.toLowerCase().includes(q) ||
+      (n.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  // 排序
+  if (state.sort === 'latest') {
+    list.sort((a, b) => b.publishedAt - a.publishedAt);
+  } else if (state.sort === 'hot') {
+    list.sort((a, b) => b.hotness - a.hotness);
+  } else if (state.sort === 'credibility') {
+    list.sort((a, b) => b.credibility - a.credibility);
+  } else {
+    list.sort((a, b) => compositeScore(b) - compositeScore(a));
+  }
+
+  return list;
+}
+
+// ===== 渲染 =====
+function renderNews() {
+  state.search = document.getElementById('searchInput').value;
+  const list = getFilteredNews();
+  const container = document.getElementById('newsList');
+
+  // 更新计数
+  updateCounts();
+
+  // 工具栏信息
+  document.getElementById('totalCount').textContent = list.length;
+  const filteredNotice = document.getElementById('filteredNotice');
+  if (state._filteredCount > 0) {
+    filteredNotice.style.display = 'flex';
+    document.getElementById('filteredCount').textContent = state._filteredCount;
+  } else {
+    filteredNotice.style.display = 'none';
+  }
+
+  // 搜索/过滤提示
+  const filteredInfo = document.getElementById('filteredInfo');
+  let infoText = '';
+  if (state.search) infoText += ` · 搜索"${state.search}"`;
+  if (state.filter !== 'all') infoText += ` · ${getFilterLabel(state.filter)}`;
+  filteredInfo.textContent = infoText;
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <h3>没有匹配的资讯</h3>
+        <p>尝试调整筛选条件或搜索关键词</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(news => renderCard(news)).join('');
+}
+
+function getFilterLabel(f) {
+  const labels = { unread: '未读', read: '已读', starred: '星标', favorites: '关键词收藏' };
+  return labels[f] || f;
+}
+
+function renderCard(news) {
+  const isRead = state.readIds.includes(news.id);
+  const isStarred = state.starredIds.includes(news.id);
+  const isFav = isKeywordHit(news);
+  const credibilityColor = news.credibility >= 4 ? 'var(--accent-green)' :
+                            news.credibility >= 3 ? 'var(--accent-yellow)' : 'var(--accent-red)';
+
+  const stars = Array.from({ length: 5 }, (_, i) =>
+    `<span class="star ${i < news.credibility ? 'filled' : ''}">★</span>`
+  ).join('');
+
+  const extraSourcesHtml = news.extraSources && news.extraSources.length > 0
+    ? `<span class="extra-sources">+${news.extraSources.length} 来源</span>` : '';
+
+  const mergedHtml = news._mergedCount > 1
+    ? `<span class="merged-indicator">⊕ 已合并 ${news._mergedCount} 条报道</span>` : '';
+
+  const pointsHtml = (news.points && news.points.length > 0)
+    ? `<ul class="news-points">${news.points.slice(0, 4).map(p => `<li>${highlightKeywords(p)}</li>`).join('')}</ul>`
+    : '';
+
+  const tagsHtml = (news.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+
+  return `
+    <article class="news-card ${isRead ? 'read' : ''} ${isStarred ? 'starred' : ''} ${isFav ? 'keyword-hit' : ''}"
+             style="--credibility-color: ${credibilityColor}" data-id="${news.id}">
+      <div class="card-header">
+        <h3 class="news-title" onclick="toggleRead('${news.id}')">${highlightKeywords(news.title)}</h3>
+        <div class="card-actions">
+          <button class="action-btn ${isRead ? 'active-read' : ''}" title="${isRead ? '标记未读' : '标记已读'}" onclick="toggleRead('${news.id}')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              ${isRead
+                ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'
+                : '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor"/>'}
+            </svg>
+          </button>
+          <button class="action-btn ${isStarred ? 'active-star' : ''}" title="${isStarred ? '取消星标' : '加星标'}" onclick="toggleStar('${news.id}')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="${isStarred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </button>
+          <button class="action-btn ${isFav ? 'active-fav' : ''}" title="关键词收藏命中" ${isFav ? '' : 'style="opacity:0.3;pointer-events:none;"'}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <p class="news-summary">${highlightKeywords(news.summary)}</p>
+      ${pointsHtml}
+      <div class="card-meta">
+        <span class="category-badge ${news.category}">${news.category === 'ai' ? 'AI' : news.category === 'tech' ? '科技' : '程序员'}</span>
+        <span class="meta-source">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          ${escapeHtml(news.source)} ${extraSourcesHtml}
+        </span>
+        <span class="meta-time">${timeAgo(news.publishedAt)}</span>
+        <span class="credibility" title="可信度 ${news.credibility}/5">${stars}</span>
+        <span class="info-density ${news.infoDensity}">${news.infoDensity === 'high' ? '高密度' : news.infoDensity === 'medium' ? '中密度' : '低密度'}</span>
+        ${mergedHtml}
+        <span class="tag-list">${tagsHtml}</span>
+      </div>
+    </article>`;
+}
+
+function updateCounts() {
+  // 分类计数（基于去重+过滤营销后的全量）
+  let all = deduplicateNews([...NEWS_POOL]).filter(n => !isMarketingContent(n));
+  document.getElementById('count-all').textContent = all.length;
+  document.getElementById('count-ai').textContent = all.filter(n => n.category === 'ai').length;
+  document.getElementById('count-tech').textContent = all.filter(n => n.category === 'tech').length;
+  document.getElementById('count-dev').textContent = all.filter(n => n.category === 'dev').length;
+
+  // 过滤器计数
+  document.getElementById('fcount-all').textContent = all.length;
+  document.getElementById('fcount-unread').textContent = all.filter(n => !state.readIds.includes(n.id)).length;
+  document.getElementById('fcount-read').textContent = all.filter(n => state.readIds.includes(n.id)).length;
+  document.getElementById('fcount-starred').textContent = all.filter(n => state.starredIds.includes(n.id)).length;
+  document.getElementById('fcount-favorites').textContent = all.filter(n => isKeywordHit(n)).length;
+}
+
+function renderKeywords() {
+  const container = document.getElementById('keywordList');
+  if (state.keywords.length === 0) {
+    container.innerHTML = '<span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);">暂无关键词</span>';
+    return;
+  }
+  container.innerHTML = state.keywords.map((kw, i) =>
+    `<span class="keyword-tag">${escapeHtml(kw)}<span class="remove" onclick="removeKeyword(${i})">×</span></span>`
+  ).join('');
+}
+
+// ===== 交互操作 =====
+function setCategory(cat) {
+  state.category = cat;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.category === cat);
+  });
+  renderNews();
+}
+
+function setFilter(f) {
+  state.filter = f;
+  document.querySelectorAll('.filter-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.filter === f);
+  });
+  renderNews();
+}
+
+function setSort(s) {
+  state.sort = s;
+  document.querySelectorAll('.sort-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.sort === s);
+  });
+  renderNews();
+}
+
+function toggleRead(id) {
+  const idx = state.readIds.indexOf(id);
+  if (idx > -1) {
+    state.readIds.splice(idx, 1);
+    showToast('已标记为未读', 'warning');
+  } else {
+    state.readIds.push(id);
+    showToast('已标记为已读', 'success');
+  }
+  saveState();
+  renderNews();
+}
+
+function toggleStar(id) {
+  const idx = state.starredIds.indexOf(id);
+  if (idx > -1) {
+    state.starredIds.splice(idx, 1);
+    showToast('已取消星标', 'warning');
+  } else {
+    state.starredIds.push(id);
+    showToast('已添加星标', 'success');
+  }
+  saveState();
+  renderNews();
+}
+
+function markAllRead() {
+  const list = getFilteredNews();
+  list.forEach(n => {
+    if (!state.readIds.includes(n.id)) state.readIds.push(n.id);
+  });
+  saveState();
+  renderNews();
+  showToast(`已将 ${list.length} 条资讯标记为已读`, 'success');
+}
+
+function addKeyword() {
+  const input = document.getElementById('keywordInput');
+  const kw = input.value.trim();
+  if (!kw) return;
+  if (state.keywords.includes(kw)) {
+    showToast('关键词已存在', 'warning');
+    return;
+  }
+  state.keywords.push(kw);
+  input.value = '';
+  saveState();
+  renderKeywords();
+  renderNews();
+  showToast(`已添加关键词"${kw}"`, 'success');
+}
+
+function removeKeyword(index) {
+  const kw = state.keywords[index];
+  state.keywords.splice(index, 1);
+  saveState();
+  renderKeywords();
+  renderNews();
+  showToast(`已移除关键词"${kw}"`, 'warning');
+}
+
+// ===== 刷新 =====
+function refreshNews() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('loading');
+
+  // 模拟刷新：重新排序 + 模拟新数据
+  setTimeout(() => {
+    state.lastRefresh = Date.now();
+    document.getElementById('lastUpdate').textContent = formatTime(state.lastRefresh);
+
+    // 模拟新增资讯（从数据池中随机"发现"新内容，实际是重新排序）
+    NEWS_POOL.forEach(n => {
+      if (Math.random() > 0.7) {
+        n.hotness = Math.min(10, n.hotness + Math.floor(Math.random() * 2));
+      }
+    });
+
+    btn.classList.remove('loading');
+    renderNews();
+    showToast('资讯已刷新，共 ' + getFilteredNews().length + ' 条', 'success');
+    resetAutoRefreshTimer();
+  }, 800);
+}
+
+function toggleAutoRefresh() {
+  state.autoRefresh = document.getElementById('autoRefresh').checked;
+  if (state.autoRefresh) {
+    resetAutoRefreshTimer();
+    showToast('已开启自动刷新（30 分钟）', 'success');
+  } else {
+    clearTimeout(state.nextRefreshTimer);
+    clearInterval(state.countdownTimer);
+    document.getElementById('nextRefresh').textContent = '已关闭';
+    showToast('已关闭自动刷新', 'warning');
+  }
+}
+
+function resetAutoRefreshTimer() {
+  clearTimeout(state.nextRefreshTimer);
+  clearInterval(state.countdownTimer);
+
+  if (!state.autoRefresh) return;
+
+  let remaining = state.refreshInterval;
+  updateCountdown(remaining);
+
+  state.countdownTimer = setInterval(() => {
+    remaining -= 1000;
+    if (remaining <= 0) {
+      refreshNews();
+      return;
+    }
+    updateCountdown(remaining);
+  }, 1000);
+
+  state.nextRefreshTimer = setTimeout(() => {
+    refreshNews();
+  }, state.refreshInterval);
+}
+
+function updateCountdown(ms) {
+  const min = Math.floor(ms / 60000);
+  const sec = Math.floor((ms % 60000) / 1000);
+  document.getElementById('nextRefresh').textContent =
+    `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+}
+
+// ===== 导出功能 =====
+function openExportModal() {
+  document.getElementById('exportModal').classList.add('active');
+}
+
+function closeExportModal() {
+  document.getElementById('exportModal').classList.remove('active');
+}
+
+function doExport() {
+  const scope = document.querySelector('input[name="exportScope"]:checked').value;
+  const format = document.querySelector('input[name="exportFormat"]:checked').value;
+
+  let newsToExport = [];
+  const all = deduplicateNews([...NEWS_POOL]).filter(n => !isMarketingContent(n));
+
+  if (scope === 'starred') {
+    newsToExport = all.filter(n => state.starredIds.includes(n.id));
+  } else if (scope === 'favorites') {
+    newsToExport = all.filter(n => isKeywordHit(n));
+  } else {
+    const starred = all.filter(n => state.starredIds.includes(n.id));
+    const favs = all.filter(n => isKeywordHit(n) && !state.starredIds.includes(n.id));
+    newsToExport = [...starred, ...favs];
+  }
+
+  if (newsToExport.length === 0) {
+    showToast('没有可导出的资讯', 'error');
+    return;
+  }
+
+  let content, filename, mimeType;
+  const timestamp = formatDate(Date.now()).replace(/-/g, '') + '_' +
+    new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }).replace(':', '');
+
+  if (format === 'markdown') {
+    content = generateMarkdown(newsToExport, scope);
+    filename = `techpulse_${timestamp}_${scope}.md`;
+    mimeType = 'text/markdown';
+  } else {
+    content = generateCSV(newsToExport);
+    filename = `techpulse_${timestamp}_${scope}.csv`;
+    mimeType = 'text/csv';
+  }
+
+  // 下载文件
+  const blob = new Blob(['\ufeff' + content], { type: mimeType + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  closeExportModal();
+  showToast(`已导出 ${newsToExport.length} 条资讯 → ${filename}`, 'success');
+}
+
+function generateMarkdown(newsList, scope) {
+  const scopeLabel = scope === 'starred' ? '星标资讯' : scope === 'favorites' ? '关键词收藏' : '星标 + 收藏';
+  let md = `# TechPulse 资讯导出 - ${scopeLabel}\n\n`;
+  md += `> 导出时间: ${new Date().toLocaleString('zh-CN')}\n`;
+  md += `> 导出数量: ${newsList.length} 条\n`;
+  md += `> 关键词: ${state.keywords.join(', ')}\n\n`;
+  md += `---\n\n`;
+
+  const categories = { ai: 'AI 行业', tech: '科技', dev: '程序员' };
+
+  newsList.forEach((news, i) => {
+    md += `## ${i + 1}. ${news.title}\n\n`;
+    md += `**分类**: ${categories[news.category] || news.category}\n`;
+    md += `**来源**: ${news.source}`;
+    if (news.extraSources && news.extraSources.length > 0) {
+      md += ` (补充: ${news.extraSources.join(', ')})`;
+    }
+    md += `\n`;
+    md += `**时间**: ${timeAgo(news.publishedAt)}\n`;
+    md += `**可信度**: ${'★'.repeat(news.credibility)}${'☆'.repeat(5 - news.credibility)} (${news.credibility}/5)\n`;
+    md += `**信息密度**: ${news.infoDensity}\n`;
+    md += `**标签**: ${(news.tags || []).join(', ')}\n\n`;
+    md += `### 摘要\n${news.summary}\n\n`;
+    if (news.points && news.points.length > 0) {
+      md += `### 要点\n`;
+      news.points.forEach(p => { md += `- ${p}\n`; });
+      md += `\n`;
+    }
+    md += `---\n\n`;
+  });
+
+  return md;
+}
+
+function generateCSV(newsList) {
+  const headers = ['序号', '标题', '分类', '来源', '补充来源', '时间', '可信度', '信息密度', '标签', '摘要', '要点'];
+  const categories = { ai: 'AI 行业', tech: '科技', dev: '程序员' };
+
+  const rows = [headers];
+  newsList.forEach((news, i) => {
+    rows.push([
+      i + 1,
+      news.title,
+      categories[news.category] || news.category,
+      news.source,
+      (news.extraSources || []).join('; '),
+      timeAgo(news.publishedAt),
+      news.credibility,
+      news.infoDensity,
+      (news.tags || []).join('; '),
+      news.summary,
+      (news.points || []).join(' | ')
+    ]);
+  });
+
+  return rows.map(row =>
+    row.map(cell => {
+      const s = String(cell);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }).join(',')
+  ).join('\n');
+}
+
+// ===== Toast 通知 =====
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(100%)';
+    toast.style.transition = '0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
+// ===== 初始化 =====
+function init() {
+  document.getElementById('lastUpdate').textContent = formatTime(state.lastRefresh);
+  document.getElementById('autoRefresh').checked = state.autoRefresh;
+
+  renderKeywords();
+  renderNews();
+  resetAutoRefreshTimer();
+
+  // 点击模态框外部关闭
+  document.getElementById('exportModal').addEventListener('click', function(e) {
+    if (e.target === this) closeExportModal();
+  });
+
+  showToast('TechPulse 已加载，共 ' + getFilteredNews().length + ' 条资讯', 'success');
+}
+
+// 启动
+init();
+</script>
+</body>
+</html>
